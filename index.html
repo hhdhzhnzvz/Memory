@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Memory Master - Игры для развития памяти</title>
+    <style>
+        :root {
+            --primary: #6a11cb;
+            --secondary: #2575fc;
+            --accent: #ff4e50;
+            --light: #f5f7fa;
+            --dark: #1e293b;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            min-height: 100vh;
+            color: var(--light);
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            animation: fadeIn 1s ease;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #fff, #c9d6ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        p.subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .game-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .game-btn {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 15px;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 120px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-btn:hover, .game-btn:focus {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .game-btn i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .games-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: none;
+            animation: fadeIn 0.5s ease;
+            flex: 1;
+            margin-bottom: 20px;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .game-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+        }
+
+        .stat {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        /* Стили для конкретных игр */
+        /* 1. Карточная память */
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .memory-card {
+            aspect-ratio: 1;
+            background: linear-gradient(45deg, #8e2de2, #4a00e0);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+            transform: rotateY(180deg);
+            color: transparent;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .memory-card.flipped {
+            transform: rotateY(0deg);
+            background: white;
+            color: var(--dark);
+        }
+
+        .memory-card.matched {
+            background: linear-gradient(45deg, var(--success), #27ae60);
+            color: white;
+            transform: rotateY(0deg);
+            cursor: default;
+        }
+
+        /* 2. Последовательность чисел */
+        .sequence-game {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .sequence-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            letter-spacing: 5px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .number-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .number-btn {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .number-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .number-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 3. Найди пару */
+        .find-pair-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .pair-card {
+            aspect-ratio: 1;
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pair-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .pair-card:hover::before {
+            opacity: 1;
+        }
+
+        .pair-card.selected {
+            background: linear-gradient(45deg, #00b4db, #0083b0);
+            color: white;
+        }
+
+        .pair-card.matched {
+            background: linear-gradient(45deg, var(--success), #27ae60);
+            cursor: default;
+        }
+
+        /* 4. Повтори ритм (новая игра) */
+        .rhythm-game {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .rhythm-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .rhythm-btn {
+            aspect-ratio: 1;
+            background: linear-gradient(45deg, #8E2DE2, #4A00E0);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .rhythm-btn.active {
+            transform: scale(0.95);
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            box-shadow: 0 0 15px rgba(255, 65, 108, 0.7);
+        }
+
+        .rhythm-display {
+            font-size: 1.5rem;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* 5. Запомни слова */
+        .word-memory-game {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .word-display {
+            font-size: 1.5rem;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            width: 100%;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .word-input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .word-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .word-btn {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(to right, var(--accent), #ff6b6b);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .word-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 78, 80, 0.4);
+        }
+
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Адаптация для мобильных */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .game-selector {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .memory-grid, .find-pair-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .stat {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .memory-grid, .find-pair-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Memory Master</h1>
+            <p class="subtitle">Тренируйте память с нашими играми</p>
+        </header>
+
+        <div class="game-selector">
+            <button class="game-btn" data-game="memory">
+                <i class="fas fa-brain"></i>
+                Карточная память
+            </button>
+            <button class="game-btn" data-game="sequence">
+                <i class="fas fa-list-ol"></i>
+                Последовательность
+            </button>
+            <button class="game-btn" data-game="pairs">
+                <i class="fas fa-clone"></i>
+                Найди пару
+            </button>
+            <button class="game-btn" data-game="rhythm">
+                <i class="fas fa-drum"></i>
+                Повтори ритм
+            </button>
+            <button class="game-btn" data-game="words">
+                <i class="fas fa-font"></i>
+                Запомни слова
+            </button>
+        </div>
+
+        <div class="games-wrapper">
+            <!-- 1. Карточная память -->
+            <div id="memory-game" class="game-container">
+                <div class="game-header">
+                    <button class="back-btn"><i class="fas fa-arrow-left"></i></button>
+                    <div class="game-title">Карточная память</div>
+                    <div class="stats">
+                        <div class="stat" id="memory-moves">Ходы: 0</div>
+                        <div class="stat" id="memory-time">Время: 0</div>
+                    </div>
+                </div>
+                <div class="memory-grid" id="memory-board"></div>
+            </div>
+
+            <!-- 2. Последовательность чисел -->
+            <div id="sequence-game" class="game-container">
+                <div class="game-header">
+                    <button class="back-btn"><i class="fas fa-arrow-left"></i></button>
+                    <div class="game-title">Последовательность чисел</div>
+                    <div class="stats">
+                        <div class="stat" id="sequence-level">Уровень: 1</div>
+                        <div class="stat" id="sequence-score">Очки: 0</div>
+                    </div>
+                </div>
+                <div class="sequence-game">
+                    <div class="sequence-display" id="sequence-display">Нажмите "Начать"</div>
+                    <div class="number-pad" id="number-pad">
+                        <button class="number-btn">1</button>
+                        <button class="number-btn">2</button>
+                        <button class="number-btn">3</button>
+                        <button class="number-btn">4</button>
+                        <button class="number-btn">5</button>
+                        <button class="number-btn">6</button>
+                        <button class="number-btn">7</button>
+                        <button class="number-btn">8</button>
+                        <button class="number-btn">9</button>
+                        <button class="number-btn" id="sequence-clear">⌫</button>
+                        <button class="number-btn">0</button>
+                        <button class="number-btn" id="sequence-submit">✓</button>
+                    </div>
+                    <button class="word-btn" id="sequence-start">Начать</button>
+                </div>
+            </div>
+
+            <!-- 3. Найди пару -->
+            <div id="pairs-game" class="game-container">
+                <div class="game-header">
+                    <button class="back-btn"><i class="fas fa-arrow-left"></i></button>
+                    <div class="game-title">Найди пару</div>
+                    <div class="stats">
+                        <div class="stat" id="pairs-attempts">Попытки: 0</div>
+                        <div class="stat" id="pairs-found">Найдено: 0</div>
+                    </div>
+                </div>
+                <div class="find-pair-grid" id="pairs-board"></div>
+            </div>
+
+            <!-- 4. Повтори ритм (новая игра) -->
+            <div id="rhythm-game" class="game-container">
+                <div class="game-header">
+                    <button class="back-btn"><i class="fas fa-arrow-left"></i></button>
+                    <div class="game-title">Повтори ритм</div>
+                    <div class="stats">
+                        <div class="stat" id="rhythm-round">Раунд: 1</div>
+                        <div class="stat" id="rhythm-score">Очки: 0</div>
+                    </div>
+                </div>
+                <div class="rhythm-game">
+                    <div class="rhythm-display" id="rhythm-display">Нажмите "Начать"</div>
+                    <div class="rhythm-pad" id="rhythm-pad">
+                        <button class="rhythm-btn" data-note="1">♪</button>
+                        <button class="rhythm-btn" data-note="2">♫</button>
+                        <button class="rhythm-btn" data-note="3">♩</button>
+                        <button class="rhythm-btn" data-note="4">♬</button>
+                        <button class="rhythm-btn" data-note="5">♭</button>
+                        <button class="rhythm-btn" data-note="6">♮</button>
+                    </div>
+                    <button class="word-btn" id="rhythm-start">Начать</button>
+                </div>
+            </div>
+
+            <!-- 5. Запомни слова -->
+            <div id="words-game" class="game-container">
+                <div class="game-header">
+                    <button class="back-btn"><i class="fas fa-arrow-left"></i></button>
+                    <div class="game-title">Запомни слова</div>
+                    <div class="stats">
+                        <div class="stat" id="words-round">Раунд: 1</div>
+                        <div class="stat" id="words-score">Очки: 0</div>
+                    </div>
+                </div>
+                <div class="word-memory-game">
+                    <div class="word-display" id="words-display">Нажмите "Следующие слова"</div>
+                    <input type="text" class="word-input" id="words-input" placeholder="Введите запомненные слова через пробел">
+                    <button class="word-btn" id="words-submit">Проверить</button>
+                    <button class="word-btn" id="words-next">Следующие слова</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Общие элементы
+            const gameContainers = document.querySelectorAll('.game-container');
+            const gameButtons = document.querySelectorAll('.game-btn');
+            const backButtons = document.querySelectorAll('.back-btn');
+            
+            // Показать меню выбора игры
+            function showGameMenu() {
+                gameContainers.forEach(container => {
+                    container.style.display = 'none';
+                });
+            }
+            
+            // Показать конкретную игру
+            function showGame(gameId) {
+                showGameMenu();
+                document.getElementById(gameId + '-game').style.display = 'block';
+                
+                // Инициализация игры
+                if (typeof window[gameId + 'Init'] === 'function') {
+                    window[gameId + 'Init']();
+                }
+            }
+            
+            // Обработчики кнопок
+            gameButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    showGame(this.getAttribute('data-game'));
+                });
+            });
+            
+            backButtons.forEach(button => {
+                button.addEventListener('click', showGameMenu);
+            });
+            
+            /* 1. Карточная память */
+            function memoryInit() {
+                const board = document.getElementById('memory-board');
+                const movesDisplay = document.getElementById('memory-moves');
+                const timeDisplay = document.getElementById('memory-time');
+                
+                let cards = ['🍎', '🍌', '🍒', '🍓', '🍊', '🍋', '🍐', '🍇'];
+                cards = [...cards, ...cards];
+                
+                let hasFlippedCard = false;
+                let lockBoard = false;
+                let firstCard, secondCard;
+                let moves = 0;
+                let matches = 0;
+                let startTime = 0;
+                let timerInterval;
+                
+                function shuffleCards() {
+                    for (let i = cards.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [cards[i], cards[j]] = [cards[j], cards[i]];
+                    }
+                }
+                
+                function createBoard() {
+                    board.innerHTML = '';
+                    shuffleCards();
+                    
+                    cards.forEach((emoji, index) => {
+                        const card = document.createElement('div');
+                        card.classList.add('memory-card');
+                        card.dataset.emoji = emoji;
+                        card.dataset.index = index;
+                        card.addEventListener('click', flipCard);
+                        board.appendChild(card);
+                    });
+                    
+                    setTimeout(() => {
+                        document.querySelectorAll('.memory-card').forEach(card => {
+                            card.classList.add('flipped');
+                            card.textContent = card.dataset.emoji;
+                        });
+                        
+                        setTimeout(() => {
+                            document.querySelectorAll('.memory-card').forEach(card => {
+                                card.classList.remove('flipped');
+                                card.textContent = '';
+                            });
+                            startTime = Date.now();
+                            timerInterval = setInterval(updateTimer, 1000);
+                        }, 3000);
+                    }, 500);
+                    
+                    moves = 0;
+                    matches = 0;
+                    updateMoves();
+                }
+                
+                function flipCard() {
+                    if (lockBoard) return;
+                    if (this === firstCard) return;
+                    if (this.classList.contains('matched')) return;
+                    
+                    this.classList.add('flipped');
+                    this.textContent = this.dataset.emoji;
+                    
+                    if (!hasFlippedCard) {
+                        hasFlippedCard = true;
+                        firstCard = this;
+                        return;
+                    }
+                    
+                    secondCard = this;
+                    moves++;
+                    updateMoves();
+                    checkForMatch();
+                }
+                
+                function checkForMatch() {
+                    const isMatch = firstCard.dataset.emoji === secondCard.dataset.emoji;
+                    
+                    if (isMatch) {
+                        disableCards();
+                        matches++;
+                        if (matches === cards.length / 2) {
+                            clearInterval(timerInterval);
+                            setTimeout(() => {
+                                alert(`Поздравляем! Вы завершили игру за ${moves} ходов и ${Math.floor((Date.now() - startTime) / 1000)} секунд!`);
+                                createBoard();
+                            }, 500);
+                        }
+                    } else {
+                        unflipCards();
+                    }
+                }
+                
+                function disableCards() {
+                    firstCard.classList.add('matched');
+                    secondCard.classList.add('matched');
+                    resetBoard();
+                }
+                
+                function unflipCards() {
+                    lockBoard = true;
+                    
+                    setTimeout(() => {
+                        firstCard.classList.remove('flipped');
+                        secondCard.classList.remove('flipped');
+                        firstCard.textContent = '';
+                        secondCard.textContent = '';
+                        resetBoard();
+                    }, 1000);
+                }
+                
+                function resetBoard() {
+                    [hasFlippedCard, lockBoard] = [false, false];
+                    [firstCard, secondCard] = [null, null];
+                }
+                
+                function updateMoves() {
+                    movesDisplay.textContent = `Ходы: ${moves}`;
+                }
+                
+                function updateTimer() {
+                    const seconds = Math.floor((Date.now() - startTime) / 1000);
+                    timeDisplay.textContent = `Время: ${seconds}`;
+                }
+                
+                createBoard();
+            }
+            
+            /* 2. Последовательность чисел - ИСПРАВЛЕНА */
+            function sequenceInit() {
+                const display = document.getElementById('sequence-display');
+                const levelDisplay = document.getElementById('sequence-level');
+                const scoreDisplay = document.getElementById('sequence-score');
+                const numberButtons = document.querySelectorAll('#number-pad .number-btn:not(#sequence-clear):not(#sequence-submit)');
+                const clearButton = document.getElementById('sequence-clear');
+                const submitButton = document.getElementById('sequence-submit');
+                const startButton = document.getElementById('sequence-start');
+                
+                let sequence = [];
+                let userInput = [];
+                let level = 1;
+                let score = 0;
+                let isShowingSequence = false;
+                let gameStarted = false;
+                
+                function generateSequence() {
+                    sequence = [];
+                    // Генерируем последовательность длиной level + 2
+                    const length = level + 2;
+                    for (let i = 0; i < length; i++) {
+                        sequence.push(Math.floor(Math.random() * 10));
+                    }
+                }
+                
+                function showSequence() {
+                    isShowingSequence = true;
+                    userInput = [];
+                    disableNumberPad();
+                    
+                    let i = 0;
+                    display.textContent = '';
+                    
+                    const interval = setInterval(() => {
+                        if (i < sequence.length) {
+                            display.textContent = sequence[i];
+                            i++;
+                        } else {
+                            clearInterval(interval);
+                            setTimeout(() => {
+                                display.textContent = 'Ваш ход...';
+                                isShowingSequence = false;
+                                enableNumberPad();
+                            }, 500);
+                        }
+                    }, 1000);
+                }
+                
+                function checkInput() {
+                    if (isShowingSequence || !gameStarted) return;
+                    
+                    // Проверяем, что введено правильное количество чисел
+                    if (userInput.length !== sequence.length) {
+                        display.textContent = `Введите ${sequence.length} чисел!`;
+                        return;
+                    }
+                    
+                    let isCorrect = true;
+                    for (let i = 0; i < sequence.length; i++) {
+                        if (sequence[i] !== userInput[i]) {
+                            isCorrect = false;
+                            break;
+                        }
+                    }
+                    
+                    if (isCorrect) {
+                        score += level * 10;
+                        level++;
+                        scoreDisplay.textContent = `Очки: ${score}`;
+                        levelDisplay.textContent = `Уровень: ${level}`;
+                        display.textContent = 'Правильно! Следующий уровень...';
+                        setTimeout(() => {
+                            startRound();
+                        }, 1500);
+                    } else {
+                        display.textContent = 'Неверно! Попробуйте еще раз.';
+                        setTimeout(() => {
+                            userInput = [];
+                            showSequence();
+                        }, 1500);
+                    }
+                }
+                
+                function startRound() {
+                    gameStarted = true;
+                    generateSequence();
+                    showSequence();
+                    startButton.style.display = 'none';
+                }
+                
+                function enableNumberPad() {
+                    numberButtons.forEach(btn => {
+                        btn.disabled = false;
+                    });
+                    clearButton.disabled = false;
+                    submitButton.disabled = false;
+                }
+                
+                function disableNumberPad() {
+                    numberButtons.forEach(btn => {
+                        btn.disabled = true;
+                    });
+                    clearButton.disabled = true;
+                    submitButton.disabled = true;
+                }
+                
+                numberButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        if (isShowingSequence || !gameStarted) return;
+                        
+                        userInput.push(parseInt(button.textContent));
+                        display.textContent = userInput.join(' ');
+                    });
+                });
+                
+                clearButton.addEventListener('click', () => {
+                    if (isShowingSequence || !gameStarted) return;
+                    
+                    userInput = [];
+                    display.textContent = '';
+                });
+                
+                submitButton.addEventListener('click', () => {
+                    if (isShowingSequence || !gameStarted) return;
+                    
+                    checkInput();
+                });
+                
+                startButton.addEventListener('click', startRound);
+                
+                generateSequence();
+                disableNumberPad();
+            }
+            
+            /* 3. Найди пару */
+            function pairsInit() {
+                const board = document.getElementById('pairs-board');
+                const attemptsDisplay = document.getElementById('pairs-attempts');
+                const foundDisplay = document.getElementById('pairs-found');
+                
+                const symbols = ['❤️', '⭐', '⚡', '🌀', '🌈', '🌙', '☀️', '🌊'];
+                let cards = [...symbols, ...symbols];
+                let selectedCards = [];
+                let attempts = 0;
+                let pairsFound = 0;
+                
+                function shuffleCards() {
+                    for (let i = cards.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [cards[i], cards[j]] = [cards[j], cards[i]];
+                    }
+                }
+                
+                function createBoard() {
+                    board.innerHTML = '';
+                    shuffleCards();
+                    
+                    cards.forEach((symbol, index) => {
+                        const card = document.createElement('div');
+                        card.classList.add('pair-card');
+                        card.dataset.symbol = symbol;
+                        card.dataset.index = index;
+                        card.textContent = '?';
+                        card.addEventListener('click', selectCard);
+                        board.appendChild(card);
+                    });
+                    
+                    setTimeout(() => {
+                        document.querySelectorAll('.pair-card').forEach(card => {
+                            card.textContent = card.dataset.symbol;
+                        });
+                        
+                        setTimeout(() => {
+                            document.querySelectorAll('.pair-card').forEach(card => {
+                                card.textContent = '?';
+                            });
+                        }, 3000);
+                    }, 500);
+                    
+                    attempts = 0;
+                    pairsFound = 0;
+                    updateStats();
+                }
+                
+                function selectCard() {
+                    if (this.classList.contains('selected') || 
+                        this.classList.contains('matched') || 
+                        selectedCards.length >= 2) {
+                        return;
+                    }
+                    
+                    this.classList.add('selected');
+                    this.textContent = this.dataset.symbol;
+                    selectedCards.push(this);
+                    
+                    if (selectedCards.length === 2) {
+                        attempts++;
+                        updateStats();
+                        checkForMatch();
+                    }
+                }
+                
+                function checkForMatch() {
+                    const [firstCard, secondCard] = selectedCards;
+                    
+                    if (firstCard.dataset.symbol === secondCard.dataset.symbol) {
+                        firstCard.classList.add('matched');
+                        secondCard.classList.add('matched');
+                        pairsFound++;
+                        updateStats();
+                        
+                        if (pairsFound === symbols.length) {
+                            setTimeout(() => {
+                                alert(`Поздравляем! Вы нашли все пары за ${attempts} попыток!`);
+                                createBoard();
+                            }, 500);
+                        }
+                    } else {
+                        setTimeout(() => {
+                            firstCard.classList.remove('selected');
+                            secondCard.classList.remove('selected');
+                            firstCard.textContent = '?';
+                            secondCard.textContent = '?';
+                        }, 1000);
+                    }
+                    
+                    setTimeout(() => {
+                        selectedCards = [];
+                    }, 1000);
+                }
+                
+                function updateStats() {
+                    attemptsDisplay.textContent = `Попытки: ${attempts}`;
+                    foundDisplay.textContent = `Найдено: ${pairsFound}`;
+                }
+                
+                createBoard();
+            }
+            
+            /* 4. Повтори ритм (новая игра) */
+            function rhythmInit() {
+                const display = document.getElementById('rhythm-display');
+                const roundDisplay = document.getElementById('rhythm-round');
+                const scoreDisplay = document.getElementById('rhythm-score');
+                const rhythmButtons = document.querySelectorAll('.rhythm-btn');
+                const startButton = document.getElementById('rhythm-start');
+                
+                let rhythmPattern = [];
+                let userInput = [];
+                let round = 1;
+                let score = 0;
+                let isShowingPattern = false;
+                let isInputPhase = false;
+                
+                function generatePattern() {
+                    rhythmPattern = [];
+                    const length = Math.min(round + 1, 6); // Максимум 6 нот
+                    for (let i = 0; i < length; i++) {
+                        rhythmPattern.push(Math.floor(Math.random() * 6) + 1);
+                    }
+                }
+                
+                function showPattern() {
+                    isShowingPattern = true;
+                    isInputPhase = false;
+                    userInput = [];
+                    disableButtons();
+                    
+                    let i = 0;
+                    display.textContent = 'Слушайте ритм...';
+                    
+                    const interval = setInterval(() => {
+                        if (i < rhythmPattern.length) {
+                            const note = rhythmPattern[i];
+                            const button = document.querySelector(`.rhythm-btn[data-note="${note}"]`);
+                            button.classList.add('active');
+                            
+                            // Воспроизводим звук (можно добавить реальные звуки)
+                            setTimeout(() => {
+                                button.classList.remove('active');
+                            }, 500);
+                            
+                            i++;
+                        } else {
+                            clearInterval(interval);
+                            setTimeout(() => {
+                                display.textContent = 'Теперь ваша очередь!';
+                                isShowingPattern = false;
+                                isInputPhase = true;
+                                enableButtons();
+                            }, 1000);
+                        }
+                    }, 1000);
+                }
+                
+                function checkInput() {
+                    if (isShowingPattern) return;
+                    
+                    // Проверяем, что введено столько же нот, сколько в паттерне
+                    if (userInput.length !== rhythmPattern.length) {
+                        display.textContent = `Введите ${rhythmPattern.length} нот!`;
+                        return;
+                    }
+                    
+                    let correct = 0;
+                    for (let i = 0; i < rhythmPattern.length; i++) {
+                        if (rhythmPattern[i] === userInput[i]) {
+                            correct++;
+                        }
+                    }
+                    
+                    const accuracy = Math.round((correct / rhythmPattern.length) * 100);
+                    score += accuracy;
+                    scoreDisplay.textContent = `Очки: ${score}`;
+                    
+                    if (accuracy === 100) {
+                        round++;
+                        roundDisplay.textContent = `Раунд: ${round}`;
+                        display.textContent = `Идеально! Переходим к раунду ${round}`;
+                        setTimeout(() => {
+                            startRound();
+                        }, 1500);
+                    } else {
+                        display.textContent = `Точность: ${accuracy}%. Попробуйте еще раз!`;
+                        setTimeout(() => {
+                            startRound();
+                        }, 2000);
+                    }
+                }
+                
+                function startRound() {
+                    generatePattern();
+                    showPattern();
+                }
+                
+                function enableButtons() {
+                    rhythmButtons.forEach(btn => {
+                        btn.disabled = false;
+                    });
+                }
+                
+                function disableButtons() {
+                    rhythmButtons.forEach(btn => {
+                        btn.disabled = true;
+                    });
+                }
+                
+                rhythmButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        if (!isInputPhase) return;
+                        
+                        const note = parseInt(this.dataset.note);
+                        userInput.push(note);
+                        this.classList.add('active');
+                        
+                        setTimeout(() => {
+                            this.classList.remove('active');
+                        }, 200);
+                        
+                        if (userInput.length === rhythmPattern.length) {
+                            isInputPhase = false;
+                            setTimeout(() => {
+                                checkInput();
+                            }, 500);
+                        }
+                    });
+                });
+                
+                startButton.addEventListener('click', startRound);
+                
+                generatePattern();
+                disableButtons();
+            }
+            
+            /* 5. Запомни слова */
+            function wordsInit() {
+                const display = document.getElementById('words-display');
+                const input = document.getElementById('words-input');
+                const submitButton = document.getElementById('words-submit');
+                const nextButton = document.getElementById('words-next');
+                const roundDisplay = document.getElementById('words-round');
+                const scoreDisplay = document.getElementById('words-score');
+                
+                const wordLists = [
+                    ['яблоко', 'банан', 'апельсин', 'виноград', 'киви'],
+                    ['собака', 'кошка', 'птица', 'рыба', 'хомяк'],
+                    ['красный', 'синий', 'зеленый', 'желтый', 'фиолетовый'],
+                    ['Москва', 'Париж', 'Лондон', 'Токио', 'Нью-Йорк'],
+                    ['январь', 'февраль', 'март', 'апрель', 'май']
+                ];
+                
+                let currentWords = [];
+                let round = 1;
+                let score = 0;
+                let isShowingWords = false;
+                let gameStarted = false;
+                
+                function selectWords() {
+                    const randomList = Math.floor(Math.random() * wordLists.length);
+                    currentWords = [...wordLists[randomList]];
+                    
+                    for (let i = currentWords.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [currentWords[i], currentWords[j]] = [currentWords[j], currentWords[i]];
+                    }
+                    
+                    currentWords = currentWords.slice(0, 3 + Math.floor(Math.random() * 3));
+                }
+                
+                function showWords() {
+                    isShowingWords = true;
+                    input.value = '';
+                    display.textContent = currentWords.join(' ');
+                    
+                    setTimeout(() => {
+                        display.textContent = 'Введите запомненные слова через пробел';
+                        isShowingWords = false;
+                    }, 5000);
+                }
+                
+                function checkAnswer() {
+                    if (isShowingWords || !gameStarted) return;
+                    
+                    const userInput = input.value.toLowerCase().trim();
+                    const userWords = userInput.split(/\s+/).filter(word => word.trim() !== '');
+                    
+                    let correct = 0;
+                    const correctWords = [];
+                    
+                    for (const word of userWords) {
+                        if (currentWords.includes(word)) {
+                            correct++;
+                            correctWords.push(word);
+                        }
+                    }
+                    
+                    score += correct * 2;
+                    scoreDisplay.textContent = `Очки: ${score}`;
+                    
+                    display.textContent = `Вы вспомнили ${correct} из ${currentWords.length} слов.\nПравильные слова: ${currentWords.join(' ')}`;
+                }
+                
+                function nextRound() {
+                    gameStarted = true;
+                    round++;
+                    roundDisplay.textContent = `Раунд: ${round}`;
+                    selectWords();
+                    showWords();
+                }
+                
+                submitButton.addEventListener('click', checkAnswer);
+                nextButton.addEventListener('click', nextRound);
+                
+                selectWords();
+                display.textContent = 'Нажмите "Следующие слова" для начала';
+            }
+
+            // Инициализация всех игр при загрузке
+            memoryInit();
+            sequenceInit();
+            pairsInit();
+            rhythmInit();
+            wordsInit();
+        });
+    </script>
+</body>
+</html>
